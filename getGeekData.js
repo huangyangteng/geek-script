@@ -58,9 +58,7 @@ var ResponseManage = {
     let ARTICLES = null
     shell.exec(intro(COLUMN_ID),{silent:true}, (code, output, stderr) => {
         if (code == 0) {
-            console.log("output", output)
             COLUMN=ResponseManage.handleIntro(output,COLUMN_ID,COLUMN_TYPE)
-            console.log("COLUMN", COLUMN)
         }
     })
     shell.exec(chapters(COLUMN_ID),{silent:true},(code,output)=>{
@@ -75,6 +73,7 @@ var ResponseManage = {
     })
     let timer=setInterval(()=>{
         if(COLUMN&&CHAPTERS&&ARTICLES){
+            COLUMN.title=COLUMN.title.replace(/\s/ig,'')
             clearInterval(timer)
             console.log('done')
 

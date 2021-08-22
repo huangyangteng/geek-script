@@ -43,17 +43,18 @@ function getStyle() {
 function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms))
 }
-const downloadPage = async() => {
-    console.log('download page')
-    const articleId=location.href.split('/').pop()
+const downloadPage = async(i) => {  
+    await sleep(3000)
     const body = document.querySelector('.ArticlePC_contentWidth_2zo6o')
         .innerHTML
     const title =
         document.querySelector('.ArticlePC_articleTitle_cZCVM').innerText +
         '.html'
     const content = getStyle() + body
-    await sleep(3000)
-    downloadFile(articleId+'_'+title, content)
+  
+    const articleId=location.href.split('/').pop()
+    console.log(i,'-------download','__'+articleId+'__'+title)
+    downloadFile('__'+articleId+'__'+title, content)
     await sleep(3000)
   
 
@@ -63,12 +64,9 @@ const downloadPage = async() => {
         document.querySelector('.ArticlePC_info_2JNDR').innerText
     )
     const fn = async () => {
-        for (let i = 0; i <= total; i++) {
-            await downloadPage()
+        for (let i = 0; i < total; i++) {
+            await downloadPage(i)
             toNextPage()
-            if(i==total){//解决最后一个下载不了的bug
-                downloadPage()
-            }
         }
     }
     fn()

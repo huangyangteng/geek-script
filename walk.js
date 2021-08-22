@@ -27,6 +27,17 @@ function getBitrate(output){
     let res=reg.exec(output)
     return Number(res[1])
 }
+function walkSync(currentDirPath, callback) {
+    fs.readdirSync(currentDirPath).forEach(function (name) {
+        var filePath = path.join(currentDirPath, name);
+        var stat = fs.statSync(filePath);
+        if (stat.isFile()) {
+            callback(filePath, stat);
+        } else if (stat.isDirectory()) {
+            walkSync(filePath, callback);
+        }
+    });
+}
 /**
  * 对当前目录下的文件进行重命名
  */
@@ -93,6 +104,12 @@ function compressHtml(filePath,outputPath){
         })
     })
 }
+
+function getArticleId(str){
+    console.log("getArticleId -> str", str)
+    const reg=/__(\d+)__/g
+    return reg.exec(str)[1]
+}
 let FileProcessor={
     renameFiles(){
         // 统一重命名
@@ -142,6 +159,9 @@ let FileProcessor={
 
     },
     handleData(chapters,allArticles){
+        // 文件列表
+        let fileList=[]
+        walkSync(__HTML_DIR_RE_RELATIVE,(file)=>{fileList.push(file)})
         let CONTENTS=[]
 
         chapters.forEach(chapter=>{
@@ -153,13 +173,16 @@ let FileProcessor={
                 let curName= formatFileName(article.article_title)
                 curName=curName.slice(2)
                 // 找到目标html
-                const FIND_HTML_SCRIPT=`find ${__HTML_DIR_RE_RELATIVE} -name "*${curName}*"`
-                const FIND_AUDIO_SCRIPT=`find ${__AUDIO_DIR_RE_RELATIVE} -name "*${curName}*"`
-                let htmlOutput=shell.exec(FIND_HTML_SCRIPT)
-                let audioOutput=shell.exec(FIND_AUDIO_SCRIPT)
-                let targetHtmlFile=getFileSrc(htmlOutput,FIND_HTML_SCRIPT)
-                let targetAudioFile=getFileSrc(audioOutput,FIND_AUDIO_SCRIPT)
-                SUB_LIST.push({id:uid(),title:article.article_title,src:targetHtmlFile,audio:targetAudioFile})
+                // const FIND_HTML_SCRIPT=`find ${__HTML_DIR_RE_RELATIVE} -name "*${curName}*"`
+                // const FIND_AUDIO_SCRIPT=`find ${__AUDIO_DIR_RE_RELATIVE} -name "*${curName}*"`
+                // let htmlOutput=shell.exec(FIND_HTML_SCRIPT)
+                // let audioOutput=shell.exec(FIND_AUDIO_SCRIPT)
+                // let targetHtmlFile=getFileSrc(htmlOutput,FIND_HTML_SCRIPT)
+                // let targetAudioFile=getFileSrc(audioOutput,FIND_AUDIO_SCRIPT)
+                // const targetHtmlFile=article.id
+                const articleFile=fileList.find(src=> getArticleId(src)==article.id )
+                console.log("handleData -> articleFile", articleFile)
+                SUB_LIST.push({id:uid(),title:article.article_title,src:articleFile,audio:''})
             })
             CONTENTS.push({
                 id:uid(),
@@ -216,7 +239,7 @@ const {column:DATA_COLUMN,chapters:DATA_CHAPTERS,articles:DATA_ARTICLES}=require
     // 进入目录
     shell.cd(__DIR)
     // 2. 统一重命名
-    FileProcessor.renameFiles()
+    // FileProcessor.renameFiles()
     // 3.删除pdf文件
     // FileProcessor.clearUpFiles()
     // 4.处理音频
