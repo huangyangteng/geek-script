@@ -85,6 +85,7 @@ var ResponseManage = {
             }`
             let {title}=COLUMN
             let dir=title+'/data'
+            shell.exec(`mkdir -p ${title}/html`)
             shell.exec(`mkdir -p ${dir}`)
             shell.cd(dir)
             shell.touch('contents.md')
