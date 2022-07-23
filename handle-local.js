@@ -17,6 +17,9 @@ if(args.length==0){
 }
 const COLUMN_HOME=args[0]
 const HTML_DIR=COLUMN_HOME+'/html/'
+const DATA_DIR=COLUMN_HOME+'/data/data.js'
+
+
 const currentDirPath=HTML_DIR
 
 let contents=[]
@@ -43,7 +46,13 @@ fs.readdirSync(currentDirPath).forEach(function (name) {
         contents.push(contentItem)
     }
 });
-fs.writeFile(`./${COLUMN_HOME}/data/contents.md`,JSON.stringify(contents,null,4),(err)=>{
+// ---------- 写入
+const columnInfo=require(DATA_DIR)
+const column={
+    ...columnInfo,
+    contents
+}
+fs.writeFile(`./${COLUMN_HOME}/data/contents.md`,JSON.stringify(column,null,4),(err)=>{
     if(err){
         console.log(err)
     }
